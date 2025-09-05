@@ -15,17 +15,17 @@ parser = argparse.ArgumentParser()
 parser.add_argument("filter", nargs="?", choices=["art", "audio"], default="art")
 parser.add_argument("--force", action="store_true")
 args = parser.parse_args()
-name_filter: typing.Callable[[str], bool] = (lambda i: "audio" in i) if args.filter == "audio" else (lambda i: "audio" not in i and "maps" not in i)
-branch = "cn" if args.filter == "art" else "voice"
+name_filter: typing.Callable[[str], bool] = (lambda i: "audio" in i) if args.filter == "audio" else (lambda i: "audio" not in i)
+branch = "data"
 
 subprocess.run(["git", "fetch", "--depth=1", "origin", f"{branch}:{branch}"], check=True)
 subprocess.run(["git", "checkout", branch], check=True)
 
 network_config = {
     "configVer": "1",
-    "funcVer": "V058",
+    "funcVer": "V060",
     "configs": {
-        "V058": {
+        "V060": {
             "override": True,
             "network": {
                 "gs": "https://gs.arknights.global:8443",
@@ -40,7 +40,7 @@ network_config = {
                 "of": "https://www.arknights.global",
                 "pkgAd": "https://play.google.com/store/apps/details?id=com.YoStarEN.Arknights",
                 "pkgIOS": "https://apps.apple.com/us/app/id1464872022?mt=8",
-                "secure": False
+                "secure": False,
             }
         }
     }
@@ -136,6 +136,11 @@ while to_update_index < len(to_update):
                 subprocess.run(command, check=True, stdout=subprocess.DEVNULL)
                 os.remove(path)
 
+        for root2, dirs2, files2 in os.walk("unstructured_assets"):
+            for f in files2:
+                if not f.lower().endswith((".atlas", ".skel", ".png")):
+                    os.remove(os.path.join(root2, f))
+
         upload_size = 0
         for dirpath, dirnames, filenames in os.walk("unstructured_assets"):
             for f in filenames:
@@ -143,7 +148,7 @@ while to_update_index < len(to_update):
                 if os.path.exists(fp):
                     upload_size += os.path.getsize(fp)
 
-        if upload_size > 1000 * 1024 * 1024:
+        if upload_size > 1900 * 1024 * 1024:
             break
 
     print("Structuring and overwriting files")
@@ -151,10 +156,9 @@ while to_update_index < len(to_update):
         for file in files:
             if (match := re.match(r"^(.+?)(_#\d+?)(\..+?)$", file)) and match[1] + match[3] in files:
                 continue
+
             current_path = os.path.join(root, file)
-            if os.path.getsize(current_path) > 48 * 1024 * 1024:
-                os.remove(current_path)
-                continue
+
             if len(files) == 1 or "#" in root:
                 desired_relpath = os.path.join(os.path.dirname(os.path.dirname(os.path.relpath(current_path, "unstructured_assets"))), file)
                 future_path = os.path.join("assets", desired_relpath).lower()
@@ -200,4 +204,4 @@ with open("bundles/hot_update_list.json", "w", encoding="utf-8") as file:
 subprocess.run(["git", "add", "bundles"], check=True)
 subprocess.run(["git", "commit", "-m", f"update {res_version} segment hot_update_list"], check=True)
 subprocess.run(["git", "push", "origin", branch], check=True)
-subprocess.run(["git", "checkout", "master"], check=True)
+subprocess.run(["git", "checkout", "main"], check=True)
