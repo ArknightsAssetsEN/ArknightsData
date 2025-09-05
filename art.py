@@ -166,11 +166,8 @@ while to_update_index < len(to_update):
                 future_path = os.path.join("assets", os.path.relpath(current_path, "unstructured_assets").lower())
 
             os.makedirs(os.path.dirname(future_path), exist_ok=True)
-            if os.path.splitext(current_path)[1] == ".wav":
-                subprocess.run(["ffmpeg", "-i", current_path, os.path.splitext(future_path)[0] + ".mp3"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                os.remove(current_path)
-            else:
-                shutil.move(os.path.abspath(current_path), os.path.abspath(future_path))
+
+            shutil.move(os.path.abspath(current_path), os.path.abspath(future_path))
 
     print("Cleaning up")
     shutil.rmtree("bundles")
