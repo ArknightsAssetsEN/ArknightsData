@@ -15,7 +15,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("filter", nargs="?", choices=["art", "audio"], default="art")
 parser.add_argument("--force", action="store_true")
 args = parser.parse_args()
-name_filter: typing.Callable[[str], bool] = (lambda i: "audio" in i) if args.filter == "audio" else (lambda i: "audio" not in i)
+filter_array=["skinpack", "chararts", "enemies", "enemy", "charavatars"]
+name_filter: typing.Callable[[str], bool] = (lambda i: any(keyword in i for keyword in filter_array))
 branch = "data"
 
 subprocess.run(["git", "fetch", "--depth=1", "origin", f"{branch}:{branch}"], check=True)
